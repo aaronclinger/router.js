@@ -1,7 +1,7 @@
-/* jshint strict: true, browser: true, nonbsp: true, bitwise: true, immed: true, latedef: true, eqeqeq: true, undef: true, curly: true, unused: true */
-/* global jQuery */
-
-;(function($, window) {
+/**
+ * @author Aaron Clinger - https://github.com/aaronclinger/router.js
+ */
+(function($) {
 	'use strict';
 	
 	function Router() {
@@ -13,41 +13,37 @@
 		    path     = location.pathname;
 		
 		
-		pub.addRoute = function(options) {
-			var route = options.route;
+		pub.addRoute = function(settings) {
+			var route = settings.route;
 			
-			if (route === '*') {
-				route = '.+';
-			} else {
-				route.replace(/(?:([^\\])\/)|^\//g, '$1\\\/');
-			}
+			route.replace(/(?:([^\\])\/)|^\//g, '$1\\\/');
 			
 			routes.push({
-				id: options.id || options.route,
-				route: route,
-				callback: options.callback
+				id: settings.id || settings.route,
+				route: '^' + route + '$',
+				callback: settings.callback
 			});
 			
 			return pub;
 		};
 		
 		pub.requestRoute = function(route) {
-			if (useHash) {
-				location.hash = route;
+			if (route) {
+				if (useHash) {
+					location.hash = route;
+				} else {
+					path = route;
+					
+					matchRoute(path);
+					
+					history.pushState({}, '', path);
+				}
 			} else {
-				path = route;
-				
-				matchRoute(path);
-				
-				history.pushState({}, '', path);
-			}
-		};
-		
-		pub.triggerRoute = function() {
-			if (useHash) {
-				matchHash();
-			} else {
-				matchRoute(location.pathname);
+				if (useHash) {
+					matchHash();
+				} else {
+					matchRoute(location.pathname);
+				}
 			}
 		};
 		
@@ -113,4 +109,4 @@
 	}
 	
 	window.Router = Router;
-}(jQuery, window));
+}(jQuery));
