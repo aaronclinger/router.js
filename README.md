@@ -63,7 +63,7 @@ Adds a new route. Only the first matched route will be triggered; routes are com
 
 ### requestRoute(*[route]*)
 
-Requests a `pushState` and route change. Note that `Router` will ignore subsequent requests of the same route.
+Requests a `pushState` and route change.
 
 * **[route]** (string) - If no route is provided, `Router` requests the current route. Requesting the current route may be helpful if you wish to trigger the initial landing route.
 
