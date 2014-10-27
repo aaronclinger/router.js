@@ -1,13 +1,13 @@
 # Router
 
-`Router` is a basic JavaScript router and `window.history` manager that falls back to using hashtags for browsers that don’t support the history object. Routes can be defined as simple strings or complex regular expressions.
+`Router` is a JavaScript router and `window.history` manager that falls back to using hashtags for browsers that don’t support the history object. Routes can be defined as simple strings or complex regular expressions.
 
 There are a lot of great open-source routers but they are often large, complex, or tied to a framework. `Router` is designed to be small, readable, and adaptable to your project.
 
 
 ## Dependencies
 
-`Router` assumes the presence of the [jQuery](http://jquery.com)’s event object. If you do not wish to include jQuery in your project, it should be fairly trivial to change the few dependences to a different event dispatcher.
+`Router` requires the presence of [jQuery](http://jquery.com). If you do not wish to include jQuery in your project, it should be fairly trivial to change the few dependences.
 
 
 ## Example Usage
@@ -18,11 +18,11 @@ function onRouteChange(data) {
 		case 'home' :
 			console.log('Catch all route.');
 			break;
-		case 'product-list' :
-			console.log('Product list route.');
+		case 'shop' :
+			console.log('Shop route.');
 			break;
 		case 'product-page' :
-			console.log('Specific product route. Product id: ' + data.matches[0]);
+			console.log('Product route id: ' + data.matches[0]);
 			break;
 	}
 }
@@ -30,16 +30,16 @@ function onRouteChange(data) {
 var router = new Router();
 
 router.addRoute({
-	id: 'product-list',
-	route: '/products',
+	id: 'shop',
+	route: '/shop',
 	callback: onRouteChange
 }).addRoute({
 	id: 'product-page',
-	route: '/products/([0-9]+)',
+	route: '/product/([0-9]+)',
 	callback: onRouteChange
 }).addRoute({
 	id: 'home',
-	route: '.+', // Catch all RegEx
+	route: '.+', // Catch all RegExp
 	callback: onRouteChange
 });
 
@@ -51,14 +51,15 @@ router.requestRoute();
 
 ### addRoute(*settings*)
 
-Adds a new route to the router. Only the first matched route will be triggered; routes are compared in the order in which they are added to `Router`.
-
-This method returns the instance of `Router` to allow for method chaining.
+Adds a new route. Only the first matched route will be triggered; routes are compared in the order in which they are added to `Router`. This method returns the instance of `Router` to allow for method chaining.
 
 * **settings** (object) - An object that defines the routes settings and callback function.
-    * **[settings.id]** (string) - An optional unique identifier that is passed to the `settings.callback` function. If left undefined, the string provided for `settings.route` will be used as the identifier.
-    * **settings.route** (string) - 
-    * **settings.callback** (function) - 
+    * **[settings.id]** (string) - An optional identifier that is passed to the `settings.callback` function. If undefined, the string provided for `settings.route` will be used as the identifier.
+    * **settings.route** (string) - The route pattern to match.
+    * **settings.callback** (function) - A function that should be called when the route has been triggered. The callback function is passed an object with two properties:
+        * **object.id** (string) - The route identifier.
+        * **object.matches** (array) - If the route included RegExp capture groups, the groups will be provided as an array. If the route does not contain any capture groups, an empty array will be provided.
+
 
 ### requestRoute(*[route]*)
 
@@ -66,9 +67,23 @@ Requests a `pushState` and route change. Note that `Router` will ignore subseque
 
 * **[route]** (string) - If no route is provided, `Router` requests the current route. Requesting the current route may be helpful if you wish to trigger the initial landing route.
 
-### data-route="*value*" 
+### data-route="*route*"
 
-`Router` will automatically 
+`Router` will detect HTML elements with the data attribute `data-route` and automatically send the value to `requestRoute` when the element is clicked.
+
+* **route** (string) - The route to send to `requestRoute`.
+
+Example:
+
+```html
+<a href="#" data-route="/shop">Link</a>
+```  
+
+Defining `data-route="href"` will pass the value of the `href` attribute to the router when the element is clicked:
+
+```html
+<a href="/shop" data-route="href">Link</a>
+```
 
 ## License
 
