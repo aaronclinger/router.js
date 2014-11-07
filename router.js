@@ -10,7 +10,8 @@
 		    history  = window.history,
 		    useHash  = !(history && 'pushState' in history),
 		    location = window.location,
-		    path     = location.pathname;
+		    path     = location.pathname,
+		    currentRoute;
 		
 		
 		pub.addRoute = function(settings) {
@@ -60,6 +61,8 @@
 				matches = route.match(regex);
 				
 				if (matches !== null) {
+					currentRoute = route;
+					
 					item.callback.apply(null, [{id: item.id, matches: matches.slice(1)}]);
 					break;
 				}
@@ -92,7 +95,7 @@
 			});
 		}
 		
-		$(document.body).on('click', '*[data-route]', function() {
+		$(document.body).on('click', '*[data-route]', function(e) {
 			var $el   = $(this),
 			    route = $el.attr('data-route');
 			
@@ -100,9 +103,11 @@
 				route = $el.attr('href');
 			}
 			
-			pub.requestRoute(route);
+			if (route !== currentRoute) {
+				pub.requestRoute(route);
+			}
 			
-			return false;
+			e.preventDefault();
 		});
 		
 		return pub;
