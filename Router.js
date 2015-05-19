@@ -96,6 +96,10 @@
 		}
 		
 		$(document.body).on('click', '*[data-route]', function(e) {
+			if (e.which === 2 || e.metaKey || e.ctrlKey) {
+				return;
+			}
+			
 			var $el   = $(this),
 			    route = $el.attr('data-route');
 			
