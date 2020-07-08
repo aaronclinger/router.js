@@ -1,17 +1,17 @@
 /**
  * @author Aaron Clinger - https://github.com/aaronclinger/router.js
  */
-(function($) {
+(function(window, document) {
 	'use strict';
 	
-	function Router() {
-		var pub      = {},
-		    routes   = [],
-		    history  = window.history,
-		    useHash  = !(history && 'pushState' in history),
-		    location = window.location,
-		    path     = location.pathname,
-		    currentRoute;
+	function Router(options) {
+		var pub      = {};
+		var routes   = [];
+		var history  = window.history;
+		var location = window.location;
+		var path     = location.pathname;
+		var currentRoute;
+		var useHash;
 		
 		
 		pub.addRoute = function(settings) {
@@ -49,11 +49,11 @@
 		};
 		
 		var matchRoute = function(route) {
-			var i = -1,
-			    l = routes.length,
-			    matches,
-			    regex,
-			    item;
+			var i = -1;
+			var l = routes.length;
+			var matches;
+			var regex;
+			var item;
 			
 			while (++i < l) {
 				item    = routes[i];
@@ -73,49 +73,68 @@
 			var hash = location.hash;
 			
 			if ( ! hash) {
-				hash = '#' + location.pathname;
+				hash = '#';
 			}
 			
 			matchRoute(hash.slice(1));
 		};
 		
-		if (useHash) {
-			$(window).on('hashchange', matchHash);
-		} else {
-			$(window).on('popstate', function() {
-				var newPath = location.pathname;
+		var addDataRouteListeners = function() {
+			document.addEventListener('click', function(e) {
+				var element = e.target;
+				var route   = element.getAttribute('data-route');
 				
-				if (path === newPath) {
-					return;
+				if (route) {
+					if (e.which === 2 || e.metaKey || e.ctrlKey) {
+						return;
+					}
+					
+					if (route === 'href') {
+						route = element.getAttribute('href');
+					}
+					
+					if (route !== currentRoute) {
+						pub.requestRoute(route);
+					}
+					
+					e.preventDefault();
 				}
-				
-				path = newPath;
-				
-				matchRoute(path);
 			});
-		}
+		};
 		
-		$(document.body).on('click', '*[data-route]', function(e) {
-			if (e.which === 2 || e.metaKey || e.ctrlKey) {
-				return;
+		var init = function(options) {
+			options = options || {};
+			useHash = options.useHash || ! (history && 'pushState' in history);
+			
+			if (useHash) {
+				window.addEventListener('hashchange', matchHash);
+			} else {
+				window.addEventListener('popstate', function() {
+					var newPath = location.pathname;
+					
+					if (path === newPath) {
+						return;
+					}
+					
+					path = newPath;
+					
+					matchRoute(path);
+				});
 			}
 			
-			var $el   = $(this),
-			    route = $el.attr('data-route');
-			
-			if (route === 'href') {
-				route = $el.attr('href');
+			if ( ! options.disableListeners) {
+				if (document.readyState === 'interactive' || document.readyState === 'complete') {
+					addDataRouteListeners();
+				} else {
+					document.addEventListener('DOMContentLoaded', addDataRouteListeners);
+				}
 			}
-			
-			if (route !== currentRoute) {
-				pub.requestRoute(route);
-			}
-			
-			e.preventDefault();
-		});
+		};
+		
+		init(options);
 		
 		return pub;
 	}
 	
 	window.Router = Router;
-}(jQuery));
+}(window, document));
